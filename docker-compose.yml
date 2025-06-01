@@ -1,0 +1,55 @@
+# https://chatgpt.com/share/683baa35-4730-8008-83fa-5551630ffc7d
+version: "3.8"
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.94.1
+    container_name: n8n_app
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      # From your original `docker run`:
+      N8N_HOST: n8n.enso.sh
+      WEBHOOK_URL: https://n8n.enso.sh/
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_RUNNERS_ENABLED: "true"
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-}
+
+      # Postgres (with pgvector) configuration
+      DB_TYPE: ${DB_TYPE:-postgresdb}
+      DB_POSTGRESDB_HOST: ${DB_POSTGRESDB_HOST:-postgres}
+      DB_POSTGRESDB_PORT: ${DB_POSTGRESDB_PORT:-5432}
+      DB_POSTGRESDB_DATABASE: ${DB_POSTGRESDB_DATABASE:-n8n}
+      DB_POSTGRESDB_USER: ${DB_POSTGRESDB_USER:-n8n}
+      DB_POSTGRESDB_PASSWORD: ${DB_POSTGRESDB_PASSWORD:-n8npassword}
+
+      # Persist workflows into Postgres
+      N8N_WORKFLOW_MANAGEMENT_ACTIVE: "true"
+
+      # (Optional) HTTP Basic Auth on n8n:
+      # N8N_BASIC_AUTH_ACTIVE: "true"
+      # N8N_BASIC_AUTH_USER: youruser
+      # N8N_BASIC_AUTH_PASSWORD: yourpass
+
+      # (Optional) Set timezone
+      GENERIC_TIMEZONE: "America/Chicago"
+    volumes:
+      - n8n_data:/home/node/.n8n
+  #   depends_on:
+  #     - postgres
+
+  # postgres:
+  #   image: pgvector/pgvector:pg16
+  #   container_name: n8n_postgres
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: n8n
+  #     POSTGRES_PASSWORD: n8npassword
+  #     POSTGRES_DB: n8n
+  #   volumes:
+  #     - n8n-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  n8n-postgres-data:
+  n8n_data:
